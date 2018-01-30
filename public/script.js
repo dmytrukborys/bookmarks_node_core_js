@@ -1,42 +1,12 @@
-/*var myBookmarks = [
- {
- title: "facebook",
- id: 0,
- category: "social networks",
- description: "My facebook acc",
- link: "https://www.facebook.com/"
- },
- {
- title: "gmail",
- id: 1,
- category: "social networks",
- description: "My gmail acc",
- link: "https://mail.google.com/mail/u/0/#inbox"
- },
- {
- title: "twitter",
- id: 2,
- category: "social networks",
- description: "My twitter acc",
- link: "https://twitter.com/"
- },
-
- {
- title: "codepen.io",
- id: 3,
- category: "learn coding",
- description: "My codepen.io acc",
- link: "https://codepen.io/Wherreger"
- }
- ]; */
 var myBookmarks = [];
+var filteredBookmarks = [];
 var myCategories = [
     "social networks",
     "learn coding",
     "learn graphic design",
     "pleasures"
 ];
-var filteredBookmarks = [];
+
 
 window.onload = shiftApp;
 
@@ -51,7 +21,7 @@ function shiftApp() {
             console.log(JSON.parse(response.responseText));
             myBookmarks = myBookmarks.concat(response.responseJSON);
             console.log(JSON.stringify(myBookmarks));
-            loadBookmarks();
+            loadBookmarks(myBookmarks);
             loadCategories();
         },
         error: function () {
@@ -63,42 +33,40 @@ function shiftApp() {
 
 function loadCategories() {
     var categoryPanel = document.getElementById("categoryPanel");
-    var currentCategory = this.myCategories;
-
-    for (var j = 0; j < currentCategory.length; j++) {
+    for (var j = 0; j < myCategories.length; j++) {
         var categoryItem = document.createElement("div");
         categoryItem.className = "categoryItem";
-        categoryItem.id = "ci" + j;
-        categoryItem.innerHTML = currentCategory[j];
+        categoryItem.innerHTML = myCategories[j];
+        categoryItem.id = myCategories[j];
         categoryPanel.appendChild(categoryItem);
         categoryItem.onclick = function (event) {
-            filterCategories(event.target.innerHTML);
+            filterCategories(event.target.id);
         };
 
 
     }
 }
 
-function loadBookmarks() {
+function loadBookmarks(bookmarks) {
 
 
-    var bookmarksPanel = document.getElementById("bookmarksPanel");
-    var currentBookmark = myBookmarks;
+    var bookmarksList = document.getElementById("bookmarksList");
 
 
-    for (var i = 0; i < currentBookmark.length; i++) {
-        var idNum = currentBookmark[i].id;
+
+    for (var i = 0; i < bookmarks.length; i++) {
+        var idNum = bookmarks[i].id;
 
         var bookmarkItem = document.createElement("div");
         bookmarkItem.className = "bookmarkItem";
-        bookmarksPanel.appendChild(bookmarkItem);
+        bookmarksList.appendChild(bookmarkItem);
 
         var bookmarkHeader = document.createElement("div");
         bookmarkHeader.className = "bookmarkHeader";
         bookmarkItem.appendChild(bookmarkHeader);
 
         var titleHyperlink = document.createElement("a");
-        titleHyperlink.href = currentBookmark[i].link;
+        titleHyperlink.href = bookmarks[i].link;
         titleHyperlink.id = "titleHyperlink";
         titleHyperlink.target = "_blank";
         titleHyperlink.class = "titleHyperlink";
@@ -106,7 +74,7 @@ function loadBookmarks() {
 
         var bookmarkTitle = document.createElement("h2");
         bookmarkTitle.className = "bookmarkTitle";
-        bookmarkTitle.innerHTML = currentBookmark[i].title;
+        bookmarkTitle.innerHTML = bookmarks[i].title;
         titleHyperlink.appendChild(bookmarkTitle);
 
         var dropdown = document.createElement("div");
@@ -150,14 +118,14 @@ function loadBookmarks() {
         var editTitle = document.createElement("input");
         editTitle.className = "editTitle";
         editTitle.type = "text";
-        editTitle.value = currentBookmark[i].title;
+        editTitle.value = bookmarks[i].title;
         editTitle.id = "editTitle" + idNum;
         bookmarkEditForm.appendChild(editTitle);
 
         var editCategory = document.createElement("input");
         editCategory.className = "editCategory";
         editCategory.type = "text";
-        editCategory.value = currentBookmark[i].category;
+        editCategory.value = bookmarks[i].category;
         editCategory.id = "editCategory" + idNum;
         bookmarkEditForm.appendChild(editCategory);
 
@@ -165,14 +133,14 @@ function loadBookmarks() {
         editDescription.className = "editDescription";
         editDescription.type = "text";
         editDescription.id = "editDescription" + idNum;
-        editDescription.value = currentBookmark[i].description;
+        editDescription.value = bookmarks[i].description;
         bookmarkEditForm.appendChild(editDescription);
 
         var bookmarkLink = document.createElement("input");
         bookmarkLink.className = "bookmarkLink";
         bookmarkLink.type = "text";
         bookmarkLink.id = "bookmarkLink" + idNum;
-        bookmarkLink.value = currentBookmark[i].link;
+        bookmarkLink.value = bookmarks[i].link;
         bookmarkEditForm.appendChild(bookmarkLink);
 
         var formSubmit = document.createElement("input");
@@ -197,8 +165,8 @@ function loadBookmarks() {
 }
 
 function submitChanges(id) {
-    let formId = id.substring(2);
-    let updatedItem = {};
+    var formId = id.substring(2);
+    var updatedItem = {};
     updatedItem.title = document.getElementById("editTitle" + formId).value;
     updatedItem.category = document.getElementById("editCategory" + formId).value;
     updatedItem.description = document.getElementById(
@@ -214,10 +182,13 @@ function submitChanges(id) {
         beforeSend: function (request) {
             request.setRequestHeader("content-type", 'application/json');
         },
-        complete: function () {
-            document.getElementById("bookmarksPanel").innerHTML="";
-            document.getElementById("categoryPanel").innerHTML="";
-            shiftApp();
+        complete: function (response) {
+            console.log(response);
+            console.log(JSON.parse(response.responseText));
+            console.log("here: " + response.responseJSON.id);
+            myBookmarks[response.responseJSON.id-1] = response.responseJSON;
+            document.getElementById("bookmarksList").innerHTML="";
+            loadBookmarks(myBookmarks);
         },
         error: function () {
             alert('there was an error!');
@@ -227,7 +198,7 @@ function submitChanges(id) {
 
 
 function addItem() {
-    let newItem = {};
+    var newItem = {};
     newItem.title = document.getElementById("newTitle").value;
     newItem.category = document.getElementById("newCategory").value;
     newItem.description = document.getElementById("newDescription").value;
@@ -246,7 +217,7 @@ function addItem() {
             myBookmarks.push(response.responseJSON);
             console.log(JSON.stringify(myBookmarks));
             document.getElementById("bookmarksPanel").innerHTML="";
-            loadBookmarks();
+            loadBookmarks(myBookmarks);
         },
         error: function () {
             alert('there was an error!');
@@ -280,15 +251,17 @@ function showDropdown(id) {
 
 function showEditForm(n) {
     var editForm = document.getElementById(n.substring(2));
-    editForm.style.display = editForm.style.display == "none" ? "block" : "none";
+    editForm.className = editForm.className == "bookmarkEditForm" ? "bookmarkEditForm-opened" : "bookmarkEditForm";
 }
 
 
 function filterCategories(categoryName) {
+    filteredBookmarks = [];
     for (var i = 0; i < myBookmarks.length; i++) {
         if (myBookmarks[i].category == categoryName) {
             filteredBookmarks.push(myBookmarks[i]);
         }
     }
-    console.log(filteredBookmarks);
+    document.getElementById("bookmarksList").innerHTML="";
+    loadBookmarks(filteredBookmarks);
 }

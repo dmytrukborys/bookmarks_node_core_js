@@ -116,6 +116,10 @@ body {
 /* Dropdown Content (Hidden by Default) */
 .dropdown-content {
     display:none;
+}
+
+.dropdown-content-opened {
+    display:block;
     flex-direction: column;
     background: lightgrey;
     position: absolute;
@@ -125,6 +129,7 @@ body {
     right: 0;
     z-index: 1;
 }
+
 /* Links inside the dropdown */
 .dropdownEdit, .dropdownDelete {
     color: black;
@@ -140,6 +145,10 @@ body {
 
 .bookmarkEditForm {
     display:none;
+}
+
+.bookmarkEditForm-opened {
+    display:block;
 }
 
 
